@@ -1,56 +1,65 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# #                               World Happiness Report Project
-
-# In[15]:
+                                  #Titanic survived Project
 
 
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
-
-url = "https://github.com/FlipRoboTechnologies/ML-Datasets/raw/main/World%20Happiness/happiness_score_dataset.csv"
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+​
+url = "https://github.com/FlipRoboTechnologies/ML-Datasets/raw/main/Titanic/titanic_train.csv"
 df = pd.read_csv(url)
-
+​
 print(df.head())
-
+print(df.info())
+print(df.describe())
 print(df.isnull().sum())
-
-X = df[['GDP per Capita', 'Family', 'Life Expectancy', 'Freedom', 'Generosity', 'Trust Government Corruption']]
-y = df['Happiness Score']
-
+​
+plt.figure(figsize=(6, 4))
+sns.countplot(x='Survived', data=df)
+plt.title('Distribution of Survived')
+plt.show()
+​
+plt.figure(figsize=(6, 4))
+sns.barplot(x='Sex', y='Survived', data=df)
+plt.title('Survival Rate by Sex')
+plt.show()
+​
+plt.figure(figsize=(6, 4))
+sns.barplot(x='Pclass', y='Survived', data=df)
+plt.title('Survival Rate by Pclass')
+plt.show()
+​
+plt.figure(figsize=(6, 4))
+sns.barplot(x='Embarked', y='Survived', data=df)
+plt.title('Survival Rate by Embarked')
+plt.show()
+​
+df['Age'].fillna(df['Age'].median(), inplace=True)
+df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)
+df.drop(['PassengerId', 'Name', 'Ticket', 'Cabin'], axis=1, inplace=True)
+df = pd.get_dummies(df, columns=['Sex', 'Embarked'], drop_first=True)
+​
+X = df.drop('Survived', axis=1)
+y = df['Survived']
+​
+from sklearn.model_selection import train_test_split
+​
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-model = LinearRegression()
-model.fit(X_train, y_train)
-
-y_pred = model.predict(X_test)
-
-mse = mean_squared_error(y_test, y_pred)
-rmse = mse ** 0.5
-
-print(f"Root Mean Squared Error: {rmse}")
-
-new_data = [[1.3, 1.4, 0.7, 0.2, 0.1, 0.1]]
-predicted_score = model.predict(new_data)
-print(f"Predicted Happiness Score: {predicted_score[0]}")
-
-
-# In[18]:
-
-
-print(df.columns)
-
-X = df[['Economy (GDP per Capita)', 'Family', 'Health (Life Expectancy)', 'Freedom', 'Generosity', 'Trust (Government Corruption)']]
-y = df['Happiness Score']
-
-print(df.head())
-
-
-# In[ ]:
-
-
-
-
+​
+print("X_train shape:", X_train.shape)
+print("X_test shape:", X_test.shape)
+print("y_train shape:", y_train.shape)
+print("y_test shape:", y_test.shape)
+​
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+​
+rf_model = RandomForestClassifier(random_state=42)        
+rf_model.fit(X_train, y_train)
+​
+y_pred = rf_model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+​
+print("Accuracy:", accuracy)
+print(classification_report(y_test, y_pred))
+​
